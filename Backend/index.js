@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import express from "express"
 
-import connectDB from './config/connection.js';
-import router from './routes/users.js'
+import connectDB from './src/config/connection.js';
+import router from './src/routes/users.js'
 
 const app = express();
 const port = process.env.PORT;
