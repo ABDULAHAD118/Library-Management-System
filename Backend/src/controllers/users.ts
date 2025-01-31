@@ -12,16 +12,16 @@ const allUsers = async (req: Request, res: Response) => {
 
 const createUser = async (req: Request, res: Response) => {
   const { redgNo, firstName, lastName, cnic, contact, department } = req.body;
-  if (!redgNo || !firstName || lastName || !cnic || !contact || !department) {
-    return res.status(400).send('Please provide all required fields');
+  if (!redgNo || !firstName || !cnic || !contact || !department) {
+    return res.status(400).json({ message: 'Please provide all required fields' });
   }
-  const checkRedgNo = await User.find({ redgNo: redgNo });
+  const checkRedgNo = await User.findOne({ redgNo: redgNo });
   if (checkRedgNo) {
-    return res.status(400).send('User with this registration number already exists');
+    return res.status(400).json({ message: 'User with this registration number already exists' });
   }
-  const checkCnic = await User.find({ cnic: cnic });
+  const checkCnic = await User.findOne({ cnic: cnic });
   if (checkCnic) {
-    return res.status(400).send('User with this cnic number already exists');
+    return res.status(400).json({ message: 'User with this cnic number already exists' });
   }
   const user = await User.create({
     redgNo: redgNo.toLowerCase(),

@@ -15,6 +15,8 @@ const port = process.env.PORT;
   }
 })();
 
+app.use(express.json());
+
 app.use('/users', userRouter);
 app.use('/departments', departmentRouter);
 
