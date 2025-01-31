@@ -1,13 +1,16 @@
 import 'dotenv/config';
 import express from "express"
 
-import connectDB from './src/config/connection.js';
-import router from './src/routes/users.js'
+import connectDB from './config/connection.ts';
+import router from './routes/users.ts';
 
 const app = express();
 const port = process.env.PORT;
 
-await connectDB(process.env.MONGO_URI);
+const mongoUri = process.env.MONGO_URI;
+if (mongoUri) {
+    await connectDB(mongoUri);
+}
 
 app.use('/users',router);
 
