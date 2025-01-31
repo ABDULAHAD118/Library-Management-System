@@ -5,7 +5,7 @@ const DepartmentSchema = new Schema(
     name: { type: String, required: true },
     deletedAt: { type: Date, default: null },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Department = model("Department", DepartmentSchema);
