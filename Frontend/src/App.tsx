@@ -1,8 +1,22 @@
+import { Route, Routes } from "react-router";
+import Dashboard from "./components/Dashboard";
+import Sidebar from "./components/Sidebar";
+import Students from "./components/Students";
+import Departments from "./components/Departments";
 
 export default function App() {
   return (
-    <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
+    <div className="flex">
+      <Sidebar />
+      <Routes>
+        <Route path="/" index element={<Dashboard />} />
+        <Route path="/departments" element={<Departments />} />
+        <Route path="/users" element={<Students />} />
+
+      </Routes>
+      {/* <h1 className="text-3xl font-bold underline">
+        Hello world!
+      </h1> */}
+    </div>
   )
 }
