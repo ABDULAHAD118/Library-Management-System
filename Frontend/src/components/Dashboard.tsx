@@ -10,7 +10,6 @@ const Dashboard = () => {
             <CustomCard />
             <CustomCard />
             <CustomCard />
-
         </div>
     )
 }
