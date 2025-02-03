@@ -16,7 +16,7 @@ import { Link } from "react-router";
 
 export default function Sidebar() {
     return (
-        <Card className="h-[calc(100vh-1rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
+        <Card className="h-[calc(100vh-1rem)] w-full max-w-[20rem] p-4 shadow-lg shadow-blue-gray-900/50 rounded-xl sticky top-0 left-0">
             <div className="mb-2 p-4">
                 <Typography variant="h5" color="blue-gray">
                     Library Management System
