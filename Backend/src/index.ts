@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 
 import connectDB from './config/connection';
 import userRouter from './routes/users';
@@ -14,6 +15,12 @@ const port = process.env.PORT;
     await connectDB(mongoUri);
   }
 })();
+
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // Or use '*' to allow any origin (not recommended for production)
+  }),
+);
 
 app.use(express.json());
 
