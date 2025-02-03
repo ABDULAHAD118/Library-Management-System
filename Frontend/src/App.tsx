@@ -12,11 +12,7 @@ export default function App() {
         <Route path="/" index element={<Dashboard />} />
         <Route path="/departments" element={<Departments />} />
         <Route path="/users" element={<Students />} />
-
       </Routes>
-      {/* <h1 className="text-3xl font-bold underline">
-        Hello world!
-      </h1> */}
     </div>
   )
 }
