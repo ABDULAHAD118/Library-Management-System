@@ -34,9 +34,9 @@ const Departments = () => {
     return (
         <>
             <div className="ml-4 text-xl font-bold">Departments</div>
-            <div className="w-96 m-14 space-y-4">
-                <Input label="Department Name" onChange={(e) => setDepartments(e.target.value)} />
-                <Button variant="gradient" onClick={addDepartment}>Add Department</Button>
+            <div className=" w-4/5 m-auto my-14 flex flex-row">
+                <Input size="lg" color="gray" label="Department Name" onChange={(e) => setDepartments(e.target.value)} />
+                <Button style={{ marginLeft: '30px', width: '230px' }} variant="gradient" onClick={addDepartment}>Add Department</Button>
             </div>
             <div className="mr-4 flex justify-end">
                 <div className="w-full max-w-sm min-w-[200px]">
@@ -47,7 +47,7 @@ const Departments = () => {
 
                         <input
                             className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-10 pr-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
-                            placeholder="UI Kits, Dashboards..."
+                            placeholder="Search Departments"
                         />
 
                         <button
