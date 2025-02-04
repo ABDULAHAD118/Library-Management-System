@@ -1,5 +1,5 @@
 import { Button, Input } from "@material-tailwind/react"
-import CustomCard from "./Card"
+import CustomCard from "./CustomCard"
 import { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -27,7 +27,7 @@ const Departments = () => {
         }
     })
 
-    const addDepartment = () => {
+    const handleDepartment = () => {
         addDepartmentMutation.mutate(departments);
     }
 
@@ -36,7 +36,7 @@ const Departments = () => {
             <div className="ml-4 text-xl font-bold">Departments</div>
             <div className=" w-4/5 m-auto my-14 flex flex-row">
                 <Input size="lg" color="gray" label="Department Name" onChange={(e) => setDepartments(e.target.value)} />
-                <Button style={{ marginLeft: '30px', width: '230px' }} variant="gradient" onClick={addDepartment}>Add Department</Button>
+                <Button style={{ marginLeft: '30px', width: '230px' }} variant="gradient" onClick={handleDepartment}>Add Department</Button>
             </div>
             <div className="mr-4 flex justify-end">
                 <div className="w-full max-w-sm min-w-[200px]">

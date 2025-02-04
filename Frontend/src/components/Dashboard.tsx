@@ -1,4 +1,4 @@
-import CustomCard from './Card'
+import CustomCard from './CustomCard'
 
 const Dashboard = () => {
     return (
