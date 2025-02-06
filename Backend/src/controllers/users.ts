@@ -31,7 +31,7 @@ const createUser = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Contact number should be 11 digits' });
   }
   if (!mongoose.Types.ObjectId.isValid(department)) {
-    return res.status(400).json({ error: 'Invalid user ID' });
+    return res.status(400).json({ error: 'Invalid Department ID' });
   }
 
   const user = await User.create({
@@ -97,37 +97,51 @@ const deleteUser = async (req: Request, res: Response) => {
 };
 
 const searchUsers = async (req: Request, res: Response) => {
-  const userName = req.params.user;
-  const searchTerms = userName.trim().split(/\s+/);
+  try {
+    const searchQuery = req.query.search as string;
 
-  let searchConditions: { [key: string]: any }[] = [];
+    if (!searchQuery || searchQuery.trim() === '') {
+      return res.status(400).json({ message: 'Please provide a search term' });
+    }
 
-  if (searchTerms.length === 1) {
-    searchConditions = [
-      { firstName: { $regex: searchTerms[0], $options: 'i' } },
-      { lastName: { $regex: searchTerms[0], $options: 'i' } },
-      { redgNo: { $regex: searchTerms[0], $options: 'i' } },
-      { cnic: { $regex: searchTerms[0], $options: 'i' } },
-    ];
-  } else if (searchTerms.length >= 2) {
-    searchConditions = [
-      {
-        $and: [
-          { firstName: { $regex: searchTerms[0], $options: 'i' } },
-          { lastName: { $regex: searchTerms[1], $options: 'i' } },
-        ],
-      },
-      { redgNo: { $regex: userName, $options: 'i' } },
-      { cnic: { $regex: userName, $options: 'i' } },
-    ];
+    const searchTerms = searchQuery.trim().split(/\s+/);
+
+    let searchConditions: { [key: string]: any }[] = [];
+
+    if (searchTerms.length === 1) {
+      searchConditions = [
+        { firstName: { $regex: searchTerms[0], $options: 'i' } },
+        { lastName: { $regex: searchTerms[0], $options: 'i' } },
+        { redgNo: { $regex: searchTerms[0], $options: 'i' } },
+        { cnic: { $regex: searchTerms[0], $options: 'i' } },
+      ];
+    } else if (searchTerms.length >= 2) {
+      searchConditions = [
+        {
+          $and: [
+            { firstName: { $regex: searchTerms[0], $options: 'i' } },
+            { lastName: { $regex: searchTerms[1], $options: 'i' } },
+          ],
+        },
+        { redgNo: { $regex: searchQuery, $options: 'i' } },
+        { cnic: { $regex: searchQuery, $options: 'i' } },
+      ];
+    }
+
+    if (mongoose.Types.ObjectId.isValid(searchQuery)) {
+      searchConditions.push({ _id: new mongoose.Types.ObjectId(searchQuery) });
+    }
+
+    const users = await User.find({ $or: searchConditions }).populate('department');
+
+    if (users.length > 0) {
+      return res.status(200).json({ users });
+    }
+    return res.status(404).json({ message: 'No user found' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
-
-  const users = await User.find({ $or: searchConditions }).populate('department');
-
-  if (users.length > 0) {
-    return res.status(200).json({ users: users });
-  }
-  return res.status(404).json({ message: 'No user found' });
 };
 
 export { fetchUsers, createUser, singleUsers, updateUser, deleteUser, searchUsers };

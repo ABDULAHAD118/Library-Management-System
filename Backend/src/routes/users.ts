@@ -11,7 +11,7 @@ import {
 const userRouter = express.Router();
 
 userRouter.route('/').get(fetchUsers).post(createUser);
+userRouter.route('/search').get(searchUsers);
 userRouter.route('/:id').get(singleUsers).patch(updateUser).delete(deleteUser);
-userRouter.route('/search/:user').get(searchUsers);
 
 export default userRouter;

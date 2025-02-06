@@ -11,11 +11,11 @@ import {
 const departmentRouter = express.Router();
 
 departmentRouter.route('/').get(fetchDepartments).post(createDepartment);
+departmentRouter.route('/search').get(searchDepartments);
 departmentRouter
   .route('/:id')
   .get(singleDepartment)
   .patch(updateDepartment)
   .delete(removeDepartment);
-departmentRouter.route('/search/:department').get(searchDepartments);
 
 export default departmentRouter;

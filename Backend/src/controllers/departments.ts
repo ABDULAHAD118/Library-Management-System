@@ -18,7 +18,7 @@ const singleDepartment = async (req: Request, res: Response) => {
   return res.status(404).json({ message: 'Department not found' });
 };
 const searchDepartments = async (req: Request, res: Response) => {
-  const department = req.params.department;
+  const department = req.query.search;
   const searchResult = await Department.find({ name: { $regex: department, $options: 'i' } });
   if (searchResult.length > 0) {
     return res.status(200).json({ departments: searchResult });
