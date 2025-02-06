@@ -81,22 +81,28 @@ const updateUser = async (req: Request, res: Response) => {
 
 const deleteUser = async (req: Request, res: Response) => {
   const userId = req.params.id;
-  const user = await User.findByIdAndDelete(userId);
+  const user = await User.findById(userId);
   if (user) {
-    return res.status(200).json({ message: 'User deleted successfully!' });
+    const deletedUser = await User.findByIdAndUpdate(
+      userId,
+      { deletedAt: new Date() },
+      { new: true },
+    );
+    if (deletedUser) {
+      return res.status(200).json({ message: 'User deleted successfully!' });
+    }
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
   return res.status(404).json({ message: 'User not found' });
 };
 
 const searchUsers = async (req: Request, res: Response) => {
   const userName = req.params.user;
-  const searchTerms = userName.trim().split(/\s+/); // Splits by space
+  const searchTerms = userName.trim().split(/\s+/);
 
   let searchConditions: { [key: string]: any }[] = [];
-  // const department = await User.find({ department: { $regex: userName, $options: 'i' } });
 
   if (searchTerms.length === 1) {
-    // If only one word is entered, search across all fields
     searchConditions = [
       { firstName: { $regex: searchTerms[0], $options: 'i' } },
       { lastName: { $regex: searchTerms[0], $options: 'i' } },
@@ -104,7 +110,6 @@ const searchUsers = async (req: Request, res: Response) => {
       { cnic: { $regex: searchTerms[0], $options: 'i' } },
     ];
   } else if (searchTerms.length >= 2) {
-    // If two words are entered, assume firstName and lastName
     searchConditions = [
       {
         $and: [
@@ -117,7 +122,6 @@ const searchUsers = async (req: Request, res: Response) => {
     ];
   }
 
-  // Perform the search
   const users = await User.find({ $or: searchConditions }).populate('department');
 
   if (users.length > 0) {
