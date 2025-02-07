@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import User from '../models/users';
 
 const fetchUsers = async (req: Request, res: Response) => {
-  const allUsers = await User.find();
+  const allUsers = await User.find().populate('department');
   if (allUsers.length > 0) {
     return res.status(200).json({ users: allUsers });
   } else {
@@ -47,6 +47,9 @@ const createUser = async (req: Request, res: Response) => {
 
 const singleUsers = async (req: Request, res: Response) => {
   const userId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: 'Invalid User Id' });
+  }
   const user = await User.findById(userId);
   if (user) {
     return res.status(200).json({ user: user });
@@ -56,6 +59,9 @@ const singleUsers = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
   const userId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: 'Invalid User Id' });
+  }
   const { redgNo, firstName, lastName, cnic, contact, department } = req.body;
   const user = await User.findById(userId);
   if (!user) {
@@ -81,19 +87,26 @@ const updateUser = async (req: Request, res: Response) => {
 
 const deleteUser = async (req: Request, res: Response) => {
   const userId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: 'Invalid User Id' });
+  }
   const user = await User.findById(userId);
   if (user) {
-    const deletedUser = await User.findByIdAndUpdate(
-      userId,
-      { deletedAt: new Date() },
-      { new: true },
-    );
-    if (deletedUser) {
-      return res.status(200).json({ message: 'User deleted successfully!' });
+    if (user.deletedAt) {
+      return res.status(200).json({ message: 'User already Deleted' });
     }
-    return res.status(500).json({ message: 'Internal Server Error' });
+  } else {
+    return res.status(404).json({ message: 'User not found' });
   }
-  return res.status(404).json({ message: 'User not found' });
+  const deletedUser = await User.findByIdAndUpdate(
+    userId,
+    { deletedAt: new Date() },
+    { new: true },
+  );
+  if (deletedUser) {
+    return res.status(200).json({ message: 'User deleted successfully!' });
+  }
+  return res.status(500).json({ message: 'Internal Server Error' });
 };
 
 const searchUsers = async (req: Request, res: Response) => {

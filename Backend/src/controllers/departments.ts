@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 import Department from '../models/departments';
 
@@ -11,6 +12,9 @@ const fetchDepartments = async (req: Request, res: Response) => {
 
 const singleDepartment = async (req: Request, res: Response) => {
   const departmentId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(departmentId)) {
+    return res.status(400).json({ message: 'Invalid Department Id' });
+  }
   const department = await Department.findById(departmentId);
   if (department) {
     return res.status(200).json({ department: department });
@@ -39,6 +43,9 @@ const createDepartment = async (req: Request, res: Response) => {
 
 const updateDepartment = async (req: Request, res: Response) => {
   const departmentId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(departmentId)) {
+    return res.status(400).json({ message: 'Invalid Department Id' });
+  }
   const department = await Department.findById(departmentId);
   if (!department) {
     return res.status(404).json({ message: 'Department not found' });
@@ -56,16 +63,26 @@ const updateDepartment = async (req: Request, res: Response) => {
 
 const removeDepartment = async (req: Request, res: Response) => {
   const departmentId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(departmentId)) {
+    return res.status(400).json({ message: 'Invalid Department Id' });
+  }
   const department = await Department.findById(departmentId);
-  if (!department) {
+  if (department) {
+    if (department.deletedAt) {
+      return res.status(200).json({ message: 'Department Already Deleted' });
+    }
+  } else {
     return res.status(404).json({ message: 'Department not found' });
   }
   const deleteDepartment = await Department.findByIdAndUpdate(departmentId, {
     deletedAt: new Date(),
   });
-  return res
-    .status(200)
-    .json({ message: 'Department deleted successfully', id: deleteDepartment?._id });
+  if (deleteDepartment) {
+    return res
+      .status(200)
+      .json({ message: 'Department deleted successfully', id: deleteDepartment._id });
+  }
+  return res.status(500).json({ message: 'Internal Server Error' });
 };
 export {
   fetchDepartments,
