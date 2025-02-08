@@ -178,6 +178,28 @@ const deleteBook = async (req: Request, res: Response) => {
     return res.status(500).json({ message: err.message });
   }
 };
-const searchBooks = async (req: Request, res: Response) => {};
+const searchBooks = async (req: Request, res: Response) => {
+  try {
+    const searchQuery = req.query.search as string;
+    if (!searchQuery || searchQuery.trim() === '') {
+      return res.status(400).json({ message: 'Please provide a search term' });
+    }
+    const findBooks = await Book.find({
+      $or: [
+        { name: { $regex: searchQuery, $options: 'i' } },
+        { authorName: { $regex: searchQuery, $options: 'i' } },
+        { title: { $regex: searchQuery, $options: 'i' } },
+        { ISBN: { $regex: searchQuery, $options: 'i' } },
+        { publisher: { $regex: searchQuery, $options: 'i' } },
+      ],
+    });
+    if (findBooks.length > 0) {
+      return res.status(200).json({ message: 'Books found', books: findBooks });
+    }
+    return res.status(404).json({ message: 'No book found' });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 export { fetchBooks, singleBook, createBook, updateBook, deleteBook, searchBooks };
