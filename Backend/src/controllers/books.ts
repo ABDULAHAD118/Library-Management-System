@@ -192,7 +192,7 @@ const searchBooks = async (req: Request, res: Response) => {
         { ISBN: { $regex: searchQuery, $options: 'i' } },
         { publisher: { $regex: searchQuery, $options: 'i' } },
       ],
-    });
+    }).populate('department');
     if (findBooks.length > 0) {
       return res.status(200).json({ message: 'Books found', books: findBooks });
     }
