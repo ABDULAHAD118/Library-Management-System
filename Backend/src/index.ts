@@ -6,6 +6,7 @@ import connectDB from './config/connection';
 import userRouter from './routes/users';
 import departmentRouter from './routes/departments';
 import bookRouter from './routes/books';
+import bookIssueRouter from './routes/bookIssue';
 
 const app = express();
 const port = process.env.PORT;
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use('/departments', departmentRouter);
 app.use('/users', userRouter);
 app.use('/books', bookRouter);
+app.use('/bookissue', bookIssueRouter);
 
 app.listen(port, () => {
   console.log(`Server is started at http://localhost:${port}`);
