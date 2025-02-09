@@ -59,12 +59,56 @@ const searchIssuedBooks = async (req: Request, res: Response) => {
     let filter: { book?: any; user?: any } = {};
     const books = await Book.find({ title: { $regex: search, $options: 'i' } });
     const bookIds = books.map((book) => book._id);
-    filter.book = { $in: bookIds };
+    if (bookIds.length > 0) {
+      filter.book = { $in: bookIds };
+    }
     const users = await User.find({ firstName: { $regex: search, $options: 'i' } });
     const userIds = users.map((user) => user._id);
-    filter.user = { $in: userIds };
-    console.log(filter);
-    const findBook = await Issue.find(filter).populate('book').populate('user');
+    if (userIds.length > 0) {
+      filter.user = { $in: userIds };
+    }
+    const findBook = await Issue.aggregate([
+      { $match: filter }, // Apply search filter
+      {
+        $lookup: {
+          from: 'books',
+          localField: 'book',
+          foreignField: '_id',
+          as: 'bookDetails',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails',
+        },
+      },
+      { $unwind: '$userDetails' }, // Convert array to object
+      {
+        $group: {
+          _id: '$user', // Group by user ID
+          userName: { $first: '$userDetails.firstName' }, // Get email
+          issuedBooks: { $push: '$bookDetails' }, // Store all books in an array
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          userId: '$_id',
+          userName: 1,
+          issuedBooks: {
+            $map: {
+              input: '$issuedBooks',
+              as: 'book',
+              in: { book: '$$book' },
+            },
+          },
+        },
+      },
+    ]);
+
     if (findBook.length > 0) {
       return res.status(200).json({ findBook });
     }
