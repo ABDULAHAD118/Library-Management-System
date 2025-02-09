@@ -4,7 +4,10 @@ import Book from '../models/books';
 const fetchBooks = async (req: Request, res: Response) => {
   try {
     const books = await Book.find({}).populate('department');
-    return res.status(200).json({ books });
+    if (books.length > 0) {
+      return res.status(200).json({ books });
+    }
+    return res.status(404).json({ message: 'No Books Found' });
   } catch (err: any) {
     return res.status(500).json({ message: err.message });
   }
