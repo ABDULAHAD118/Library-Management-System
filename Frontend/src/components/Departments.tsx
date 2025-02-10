@@ -1,42 +1,61 @@
-import { Button, Input } from "@material-tailwind/react"
+import { Button, Input, Spinner } from "@material-tailwind/react"
 import CustomCard from "./CustomCard"
 import { useState } from "react";
 import axios from "axios";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const Departments = () => {
     const [departments, setDepartments] = useState('');
+    const queryClient = useQueryClient();
     const fetchDepartment = async () => {
         const result = await axios.get('http://localhost:3000/departments');
-        return result.data;
+        return result.data.departments;
     }
-    const { data: totalDepartments, isFetched } = useQuery({
+    const { data: totalDepartments, isFetching } = useQuery({
         queryKey: ['departments'],
         queryFn: fetchDepartment,
-        staleTime: 1000 * 60 * 10
+        staleTime: 1000 * 60 * 5
     })
     const createDepartment = async (department: string) => {
         const result = await axios.post('http://localhost:3000/departments', { name: department });
         return result.data;
     }
-    const addDepartmentMutation = useMutation({
+    const { mutate: addDepartmentMutation, isPending } = useMutation({
         mutationFn: createDepartment,
         onSuccess: (data) => {
-            console.log('Department added successfully');
-            console.log(data);
+            toast.success(data.message);
+            setDepartments('');
+            queryClient.invalidateQueries({ queryKey: ['departments'] });
+        },
+        onError: (error: any) => {
+            toast.error(error.message);
         }
     })
 
     const handleDepartment = () => {
-        addDepartmentMutation.mutate(departments);
+        addDepartmentMutation(departments);
     }
+
+    const handleEdit = async (id: string) => {
+        console.log('Edit clicked', id);
+    }
+    const handleDelete = async (id: string) => {
+        console.log('Delete Clicked', id);
+    }
+    const handleView = async (id: string) => {
+        console.log('View Clicked', id);
+    }
+    // const handleSearch = async () => { }
+
 
     return (
         <>
             <div className="ml-4 text-xl font-bold">Departments</div>
             <div className=" w-4/5 m-auto my-14 flex flex-row">
-                <Input size="lg" color="gray" label="Department Name" onChange={(e) => setDepartments(e.target.value)} />
-                <Button style={{ marginLeft: '30px', width: '230px' }} variant="gradient" onClick={handleDepartment}>Add Department</Button>
+                <Input size="lg" color="gray" label="Department Name" value={departments} onChange={(e) => setDepartments(e.target.value)} />
+                <Button style={{ marginLeft: '30px', width: '230px' }} className="flex justify-center" variant="gradient" onClick={handleDepartment}>{isPending ? <Spinner /> : 'Add Department'}</Button>
+
             </div>
             <div className="mr-4 flex justify-end">
                 <div className="w-full max-w-sm min-w-[200px]">
@@ -59,9 +78,10 @@ const Departments = () => {
                     </div>
                 </div>
             </div>
-            {
+
+            {isFetching ? <div className="mt-10 flex justify-center"><Spinner /></div> : !totalDepartments ? <div className="mt-10 flex justify-center">No Department Found</div> :
                 totalDepartments && totalDepartments.map((department: any) => (
-                    <CustomCard title={department.name} icon="departments" key={department._id} />
+                    <CustomCard title={department.name} icon="departments" key={department._id} onDelete={() => handleDelete(department._id)} onEdit={() => handleEdit(department._id)} onView={() => handleView(department._id)} />
                 ))
             }
         </>
