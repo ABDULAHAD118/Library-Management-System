@@ -14,14 +14,13 @@ const Students = () => {
 
     const fetchDepartments = async () => {
         const response = await axios.get('http://localhost:3000/departments');
-        return response.data;
+        return response.data.departments;
     }
 
     const { data } = useQuery({
         queryKey: ['students'],
         queryFn: fetchDepartments,
-        staleTime: 1000 * 60 * 10,
-        // fetch students
+        staleTime: 1000 * 60 * 5
     })
 
     const createStudent = async (student: any) => {
