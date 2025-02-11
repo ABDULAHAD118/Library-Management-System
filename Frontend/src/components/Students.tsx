@@ -8,19 +8,20 @@ const Students = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [department, setDepartment] = useState('');
-    const [redgNo, setRedgNo] = useState('');
+    const [regNo, setRegNo] = useState('');
     const [contact, setContact] = useState('');
     const [cnic, setCnic] = useState('');
 
     const fetchDepartments = async () => {
         const response = await axios.get('http://localhost:3000/departments');
-        return response.data.departments;
+        const active = response.data.departments.filter((department: any) => !department.deletedAt);
+        return active;
     }
 
     const { data } = useQuery({
-        queryKey: ['students'],
+        queryKey: ['departments'],
         queryFn: fetchDepartments,
-        staleTime: 1000 * 60 * 5
+        staleTime: 1000 * 60 * 5,
     })
 
     const createStudent = async (student: any) => {
@@ -42,10 +43,10 @@ const Students = () => {
     })
 
     const handleStudent = () => {
-        if (firstName === '' || lastName === '' || department === '' || redgNo === '' || contact === '' || cnic === '') {
+        if (firstName === '' || lastName === '' || department === '' || regNo === '' || contact === '' || cnic === '') {
             console.log('Please fill all the fields');
         } else {
-            studentMutation({ firstName, lastName, redgNo, department, cnic, contact });
+            studentMutation({ firstName, lastName, regNo, department, cnic, contact });
         }
     }
     return (
@@ -54,17 +55,17 @@ const Students = () => {
             <div className="space-y-4 w-4/5 m-auto my-5">
                 <Input title="First Name" onChange={(e) => setFirstName(e.target.value)} label="First Name" />
                 <Input title="Last Name" label="Last Name" onChange={(e) => setLastName(e.target.value)} />
-                <Input title="Registration Number" label="Registration Number" onChange={(e) => setRedgNo(e.target.value)} />
+                <Input title="Registration Number" label="Registration Number" onChange={(e) => setRegNo(e.target.value)} />
                 <div>
 
-                    <select id="countries" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => setDepartment(e.target.value)}>
+                    <select id="countries" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => setDepartment(e.target.value)} >
                         <option value='' >Select a Department</option>
-                        {data?.map((department: any) => (
+                        {Array.isArray(data) && data.length > 0 ? data.map((department: any) => (
                             <option value={department._id} key={department._id}>{department.name}</option>
-                        ))}
+                        )) : <option value='' >No Registered Department</option>}
                     </select>
                 </div>
-                <Input title="Contatct Number" label="Contatct Number" onChange={(e) => setContact(e.target.value)} />
+                <Input title="Contact Number" label="Contact Number" onChange={(e) => setContact(e.target.value)} />
                 <Input title="CNIC Number" label="CNIC Number" onChange={(e) => setCnic(e.target.value)} />
                 <Button variant="gradient" onClick={handleStudent}>Add Student</Button>
             </div>

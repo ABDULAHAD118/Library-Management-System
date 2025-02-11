@@ -5,13 +5,14 @@ interface PropsTypes {
     title: string;
     icon: string;
     total?: number;
+    checkButton?: boolean;
     onEdit?: () => void;
     onView?: () => void;
     onDelete?: () => void;
 }
 
 const CustomCard = (props: PropsTypes) => {
-    const { title, icon, total, onEdit, onView, onDelete } = props;
+    const { title, icon, total, onEdit, onView, checkButton, onDelete } = props;
     return (
         <div>
             <Card className={`p-2 m-4 flex flex-row  items-center ${total && 'w-72'} `}>
@@ -27,7 +28,7 @@ const CustomCard = (props: PropsTypes) => {
                     )}
                 </CardBody>
                 {
-                    !total && <CardFooter className='flex space-x-3'>
+                    checkButton && <CardFooter className='flex space-x-3'>
                         <Button variant="gradient" onClick={onView}>View</Button>
                         <Button variant="gradient" color='green' onClick={onEdit}>Edit</Button>
                         <Button variant="gradient" color='red' onClick={onDelete}>Delete</Button>

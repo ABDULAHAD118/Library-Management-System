@@ -12,12 +12,12 @@ const fetchUsers = async (req: Request, res: Response) => {
 };
 
 const createUser = async (req: Request, res: Response) => {
-  const { redgNo, firstName, lastName, cnic, contact, department } = req.body;
-  if (!redgNo || !firstName || !cnic || !contact || !department) {
+  const { regNo, firstName, lastName, cnic, contact, department } = req.body;
+  if (!regNo || !firstName || !cnic || !contact || !department) {
     return res.status(400).json({ message: 'Please provide all required fields' });
   }
-  const checkRedgNo = await User.findOne({ redgNo: redgNo });
-  if (checkRedgNo) {
+  const checkRegNo = await User.findOne({ regNo: regNo });
+  if (checkRegNo) {
     return res.status(400).json({ message: 'User with this registration number already exists' });
   }
   if (cnic.length !== 13) {
@@ -35,7 +35,7 @@ const createUser = async (req: Request, res: Response) => {
   }
 
   const user = await User.create({
-    redgNo: redgNo.toLowerCase(),
+    regNo: regNo.toLowerCase(),
     firstName,
     lastName,
     cnic,
@@ -62,7 +62,7 @@ const updateUser = async (req: Request, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return res.status(400).json({ message: 'Invalid User Id' });
   }
-  const { redgNo, firstName, lastName, cnic, contact, department } = req.body;
+  const { regNo, firstName, lastName, cnic, contact, department } = req.body;
   const user = await User.findById(userId);
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
@@ -70,7 +70,7 @@ const updateUser = async (req: Request, res: Response) => {
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     {
-      redgNo: redgNo ? redgNo.toLowerCase() : user.redgNo,
+      regNo: regNo ? regNo.toLowerCase() : user.regNo,
       firstName: firstName || user.firstName,
       lastName: lastName || user.lastName,
       cnic: cnic || user.cnic,
