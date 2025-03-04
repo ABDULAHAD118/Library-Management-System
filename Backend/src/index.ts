@@ -12,7 +12,7 @@ const app = express();
 const port = process.env.PORT;
 
 (async () => {
-  const mongoUri = process.env.MONGO_URI;
+  const mongoUri = process.env.MONGO_URL;
   if (mongoUri) {
     await connectDB(mongoUri);
   }

@@ -1,35 +1,23 @@
 import { Button, Input, Spinner } from "@material-tailwind/react"
 import CustomCard from "./CustomCard"
 import { useState } from "react";
-import axios from "axios";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Modal } from "./Modal";
 import { useSearchParams } from "react-router";
+import { createDepartment, deleteDepartment, fetchDepartments, searchDepartments } from "../services/departmentServices";
 
 const Departments = () => {
     const [departments, setDepartments] = useState('');
-    const [departmentName, setDepartmentName] = useState('');
-    const queryClient = useQueryClient();
-    const [open, setOpen] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
+    const queryClient = useQueryClient();
     const search = searchParams.get("search") || "";
-    const fetchDepartment = async () => {
-        const result = await axios.get('http://localhost:3000/departments');
-        const active = result.data.departments.filter((department: any) => !department.deletedAt);
-        return active;
-    }
+
     const { data: totalDepartments, isFetching, isError } = useQuery({
         queryKey: ['departments'],
-        queryFn: fetchDepartment,
+        queryFn: fetchDepartments,
         staleTime: 1000 * 60 * 5
     })
 
-
-    const createDepartment = async (department: string) => {
-        const result = await axios.post('http://localhost:3000/departments', { name: department });
-        return result.data;
-    }
     const { mutate: addDepartmentMutation, isPending } = useMutation({
         mutationFn: createDepartment,
         onSuccess: (data) => {
@@ -51,13 +39,8 @@ const Departments = () => {
         console.log('Edit clicked', id);
     }
 
-    const onDelete = async (id: string) => {
-        const result = await axios.delete(`http://localhost:3000/departments/${id}`);
-        return result.data;
-    }
-
     const { mutate: deleteDepartmentMutation } = useMutation({
-        mutationFn: onDelete,
+        mutationFn: deleteDepartment,
         onSuccess: (data) => {
             toast.success(data.message);
             queryClient.invalidateQueries({ queryKey: ['departments'] });
@@ -67,34 +50,9 @@ const Departments = () => {
         }
     })
 
-
-
     const handleDelete = async (id: string) => {
         deleteDepartmentMutation(id);
     }
-    const handelModal = () => {
-        setOpen(!open);
-    }
-
-    const { mutate, isPending: fetching } = useMutation({
-        mutationKey: ['singleDepartment'],
-        mutationFn: (id: string) => { return axios.get(`http://localhost:3000/departments/${id}`) },
-        onSuccess(data) {
-            setDepartmentName(data.data.department.name)
-        }
-    })
-
-    const handleView = async (id: string) => {
-        mutate(id);
-        setOpen(!open)
-    }
-
-    const searchDepartments = async () => {
-        const response = await axios.get(`http://localhost:3000/departments/search`, {
-            params: { search },
-        });
-        return response.data.departments.filter((dept: any) => !dept.deletedAt);
-    };
 
     const { mutate: searchData, isPending: searchLoading, } = useMutation({
         mutationKey: ["searchDepartments"], // Refetch when search changes
@@ -107,7 +65,7 @@ const Departments = () => {
         }
     });
     const handleSearch = async () => {
-        searchData();
+        searchData(search);
     }
 
 
@@ -145,11 +103,8 @@ const Departments = () => {
             {isError && <div className="mt-10 flex justify-center">Check Your internet connection</div>}
             {isFetching ? <div className="mt-10 flex justify-center"><Spinner /></div> : Array.isArray(totalDepartments) && totalDepartments.length === 0 ? <div className="mt-10 flex justify-center">No Department Found</div> :
                 totalDepartments && totalDepartments.map((department: any) => (
-                    <CustomCard title={department.name} icon="departments" key={department._id} onDelete={() => handleDelete(department._id)} onEdit={() => handleEdit(department._id)} onView={() => handleView(department._id)} checkButton={true} />
+                    <CustomCard title={department.name} icon="departments" key={department._id} onDelete={() => handleDelete(department._id)} onEdit={() => handleEdit(department._id)} checkButton={true} />
                 ))}
-            {fetching ? <div className="mt-10 flex justify-center"><Spinner /></div>
-                :
-                <Modal open={open} handleOpen={handelModal} title={departmentName} />}
         </>
     )
 }

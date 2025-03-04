@@ -42,7 +42,7 @@ const createUser = async (req: Request, res: Response) => {
     contact,
     department,
   });
-  return res.status(201).json(user);
+  return res.status(201).json({ message: 'Student Created Successfully!', user: user });
 };
 
 const singleUsers = async (req: Request, res: Response) => {

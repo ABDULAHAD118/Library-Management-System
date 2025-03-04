@@ -7,15 +7,14 @@ interface PropsTypes {
     total?: number;
     checkButton?: boolean;
     onEdit?: () => void;
-    onView?: () => void;
     onDelete?: () => void;
 }
 
 const CustomCard = (props: PropsTypes) => {
-    const { title, icon, total, onEdit, onView, checkButton, onDelete } = props;
+    const { title, icon, total, onEdit, checkButton, onDelete } = props;
     return (
         <div>
-            <Card className={`p-2 m-4 flex flex-row  items-center ${total && 'w-72'} `}>
+            <Card className={`p-2 m-4 flex flex-row  items-center  ${total ? 'w-72' : 'justify-between'} `}>
                 <CardHeader className='mt-2 grid h-12 w-12 place-items-center bg-gray-800'>
                     {icon == 'students' && <UserCircleIcon className='h-6 w-6' color='white' />}
                     {icon == 'books' && <BookOpenIcon className='h-6 w-6' color='white' />}
@@ -29,7 +28,6 @@ const CustomCard = (props: PropsTypes) => {
                 </CardBody>
                 {
                     checkButton && <CardFooter className='flex space-x-3'>
-                        <Button variant="gradient" onClick={onView}>View</Button>
                         <Button variant="gradient" color='green' onClick={onEdit}>Edit</Button>
                         <Button variant="gradient" color='red' onClick={onDelete}>Delete</Button>
                     </CardFooter>

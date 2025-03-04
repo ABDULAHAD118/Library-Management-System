@@ -1,8 +1,11 @@
-import { Button, Input } from "@material-tailwind/react"
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { Button, Input, Spinner } from "@material-tailwind/react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react"
 import StudentCard from "./StudentCard";
+import { fetchDepartments } from "../services/departmentServices";
+import { createStudent, deleteStudent, fetchStudents } from "../services/studentServices";
+import toast from "react-hot-toast";
+import { InformationCircleIcon } from "@heroicons/react/24/solid";
 
 const Students = () => {
     const [firstName, setFirstName] = useState('');
@@ -11,44 +14,70 @@ const Students = () => {
     const [regNo, setRegNo] = useState('');
     const [contact, setContact] = useState('');
     const [cnic, setCnic] = useState('');
+    const queryClient = useQueryClient();
 
-    const fetchDepartments = async () => {
-        const response = await axios.get('http://localhost:3000/departments');
-        const active = response.data.departments.filter((department: any) => !department.deletedAt);
-        return active;
-    }
-
-    const { data } = useQuery({
+    const { data, isFetching } = useQuery({
         queryKey: ['departments'],
         queryFn: fetchDepartments,
         staleTime: 1000 * 60 * 5,
     })
+    const { data: studentData, isFetching: studentFetching } = useQuery({
+        queryKey: ['students'],
+        queryFn: fetchStudents,
+        staleTime: 1000 * 60 * 5,
+    })
 
-    const createStudent = async (student: any) => {
-        const response = await axios.post('http://localhost:3000/users', student,
-            { headers: { 'Content-Type': 'application/json' } }
-        );
-        return response.data;
-    }
-
-    const { mutate: studentMutation } = useMutation({
+    const { mutate: studentMutation, isPending } = useMutation({
         mutationKey: ['createStudent'],
         mutationFn: createStudent,
-        onSuccess: () => {
-            console.log('Student Added');
+        onSuccess: (data) => {
+            toast.success(data.message);
+            setFirstName('');
+            setLastName('');
+            setRegNo('');
+            setDepartment('');
+            setContact('');
+            setCnic('');
+            queryClient.invalidateQueries({ queryKey: ['students'] });
         },
         onError: (error: any) => {
-            console.log(error.response.data.message);
+            toast.error(error.response.data.message);
         }
     })
 
     const handleStudent = () => {
         if (firstName === '' || lastName === '' || department === '' || regNo === '' || contact === '' || cnic === '') {
-            console.log('Please fill all the fields');
+            toast('Please fill all the fields', {
+                duration: 2500,
+                icon: <InformationCircleIcon width={30} color="blue" />,
+            });
         } else {
             studentMutation({ firstName, lastName, regNo, department, cnic, contact });
         }
     }
+    const handleEdit = () => { }
+
+    const { mutate: deleteStudentMutation } = useMutation({
+        mutationKey: ['deleteStudent'],
+        mutationFn: deleteStudent,
+        onSuccess: (data) => {
+            toast.success(data.message);
+            queryClient.invalidateQueries({ queryKey: ['students'] });
+        },
+        onError: (error: any) => {
+            toast.error(error.response.data.message);
+        }
+    })
+    const handleDelete = (id: string) => {
+        deleteStudentMutation(id);
+    }
+
+    if (isFetching) {
+        return <div className="flex justify-center">
+            <Spinner />
+        </div>
+    }
+
     return (
         <>
             <div className="ml-4 text-xl font-bold">Students</div>
@@ -57,7 +86,6 @@ const Students = () => {
                 <Input title="Last Name" label="Last Name" onChange={(e) => setLastName(e.target.value)} />
                 <Input title="Registration Number" label="Registration Number" onChange={(e) => setRegNo(e.target.value)} />
                 <div>
-
                     <select id="countries" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => setDepartment(e.target.value)} >
                         <option value='' >Select a Department</option>
                         {Array.isArray(data) && data.length > 0 ? data.map((department: any) => (
@@ -67,7 +95,7 @@ const Students = () => {
                 </div>
                 <Input title="Contact Number" label="Contact Number" onChange={(e) => setContact(e.target.value)} />
                 <Input title="CNIC Number" label="CNIC Number" onChange={(e) => setCnic(e.target.value)} />
-                <Button variant="gradient" onClick={handleStudent}>Add Student</Button>
+                <Button variant="gradient" className="flex justify-center" onClick={handleStudent}>{isPending ? <Spinner /> : 'Add Student'}</Button>
             </div>
             <div className="mr-4 flex justify-end">
                 <div className="w-full max-w-sm min-w-[200px]">
@@ -90,13 +118,12 @@ const Students = () => {
                     </div>
                 </div>
             </div>
-            <div className="flex space-y-4 flex-wrap justify-evenly">
-                <StudentCard />
-                <StudentCard />
-                <StudentCard />
-                <StudentCard />
-                <StudentCard />
-            </div>
+            {studentFetching ? <div className="mt-10 flex justify-center"><Spinner /></div> : !studentData || studentData && studentData.length === 0 ? <div className="mt-10 flex justify-center">No Student Found</div> :
+                <div className="flex mt-10 space-y-3 flex-wrap justify-evenly">
+                    {studentData && studentData.map((student: any) => (
+                        <StudentCard key={student._id} firstName={student.firstName} lastName={student.lastName} regNo={student.regNo} contact={student.contact} cnic={student.cnic} department={student.department?.name} handleEdit={handleEdit} handleDelete={() => handleDelete(student._id)} />
+                    ))}
+                </div>}
         </>
     )
 }

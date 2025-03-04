@@ -18,7 +18,6 @@ createRoot(document.getElementById("root")!).render(
           <Toaster position="top-right" />
           <ReactQueryDevtools initialIsOpen={false} />
         </BrowserRouter>
-
       </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>
